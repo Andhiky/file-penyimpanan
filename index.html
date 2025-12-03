@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri File Media Elegan & Fungsional</title>
+    
+    <style>
+        /* Variabel Warna */
+        :root {
+            --color-bg-light: #f9f9f9;
+            --color-bg-white: #ffffff;
+            --color-primary: #1e88e5; /* Cerulean Blue */
+            --color-primary-dark: #1565c0;
+            --color-text-dark: #333;
+            --color-text-medium: #666;
+            --color-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --color-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --color-success: #43a047;
+            --color-danger: #e53935;
+        }
+
+        /* RESET & FONT DASAR */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--color-bg-light);
+            color: var(--color-text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        header {
+            background-color: var(--color-bg-white);
+            padding: 30px 40px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        header h1 {
+            font-size: 2.2em;
+            font-weight: 300; /* Tipografi ringan */
+            letter-spacing: 1px;
+            color: var(--color-primary-dark);
+        }
+
+        /* TOOLBAR (IMPORT/EXPORT) */
+        .toolbar {
+            padding: 25px 40px;
+            background-color: var(--color-bg-white);
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .import-section, .export-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 12px 25px;
+            border-radius: 10px; /* Lebih rounded */
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            border: 2px solid transparent;
+            font-size: 0.95em;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-bg-white);
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e3f2fd; /* Lightest blue */
+            border-color: var(--color-primary-dark);
+        }
+
+        #fileCount, #uploadStatus {
+            color: var(--color-text-medium);
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        
+        #uploadStatus {
+            color: #ffb300; /* Amber for loading */
+            font-weight: 600;
+        }
+
+        /* GALERI GRID */
+        .gallery-container {
+            padding: 0 40px 40px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Ukuran sedikit lebih besar */
+            gap: 25px;
+        }
+
+        /* ITEM FILE */
+        .file-item {
+            background-color: var(--color-bg-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--color-shadow-light);
+            transition: transform 0.3s ease, box-shadow 0.3s, border 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 3px solid transparent; /* Lebih tebal */
+        }
+
+        .file-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--color-shadow-hover);
+        }
+
+        .file-item.selected {
+            border-color: var(--color-success); /* Border hijau elegan saat dipilih */
+            box-shadow: 0 0 15px rgba(67, 160, 71, 0.5);
+        }
+        
+        /* OVERLAY SELEKSI */
+        .selection-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+        }
+        
+        .selection-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            border: 2px solid var(--color-bg-white);
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* THUMBNAIL */
+        .thumbnail-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 60%; /* Rasio 5:3, terlihat lebih sinematik */
+            cursor: pointer;
+            overflow: hidden;
+            background-color: #e0e0e0;
+        }
+
+        .thumbnail-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .thumbnail-wrapper:hover img {
+            transform: scale(1.1); /* Efek zoom yang lebih dramatis */
+        }
+
+        .file-info {
+            padding: 18px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-info h4 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--color-text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1; 
+            margin-right: 10px;
+        }
+
+        /* TOMBOL AKSI */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-buttons button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--color-text-medium);
+            font-size: 20px;
+            padding: 5px;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .action-buttons button:hover {
+            color: var(--color-primary);
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            color: var(--color-danger) !important;
+        }
+        .delete-btn:hover {
+            color: #b71c1c !important;
+        }
+
+        /* MODAL (POPUP) - Ditingkatkan agar lebih fokus */
+        .modal {
+            background-color: rgba(0,0,0,0.95); /* Lebih gelap */
+        }
+
+        .modal-content {
+            background-color: #212121; /* Latar belakang gelap untuk media */
+            margin: 3% auto; 
+            padding: 0;
+            border-radius: 10px;
+            width: 90%; 
+            max-width: 1200px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+        }
+        
+        #videoPlayer {
+            border-radius: 10px;
+            display: block;
+        }
+
+        .close-button {
+            color: #fff; /* X Putih */
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 36px;
+            z-index: 101;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            opacity: 1;
+            color: var(--color-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🖼️ GALERI MEDIA DIGITAL</h1>
+    </header>
+    
+    <section class="toolbar">
+        <div class="import-section">
+            <label for="fileUpload" class="btn-primary">⬆️ Unggah File Baru</label>
+            <input type="file" id="fileUpload" multiple accept="image/*,video/*" style="display: none;">
+            <span id="fileCount"></span>
+            <span id="uploadStatus"></span>
+        </div>
+        <div class="export-section">
+            <button class="btn-secondary" onclick="exportSelectedFiles()">⬇️ Ekspor File Terpilih</button>
+        </div>
+    </section>
+
+    <main class="gallery-container" id="file-gallery">
+        </main>
+
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <video id="videoPlayer" controls autoplay muted width="100%">
+                Maaf, browser Anda tidak mendukung pemutar video.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        // Data file SIMULASI (dengan URL video eksternal yang berfungsi)
+        const files = [
+            { 
+                id: 1, 
+                name: "Video Big Buck Bunny", 
+                type: "video", 
+                thumbnailUrl: "https://via.placeholder.com/300x180?text=Video+1+Default",
+                fileUrl: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+            },
+            { 
+                id: 2, 
+                name: "Foto Pemandangan", 
+                type: "image", 
+                thumbnailUrl: "https://via.placeholder.com/300x180?text=Foto+2+Default",
+                fileUrl: "https://via.placeholder.com/1280x768?text=Foto+Asli+2" 
+            },
+        ];
+
+        const gallery = document.getElementById('file-gallery');
+        const videoModal = document.getElementById('videoModal');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const fileUploadInput = document.getElementById('fileUpload');
+        const fileCountSpan = document.getElementById('fileCount');
+        const uploadStatusSpan = document.getElementById('uploadStatus');
+        let newFileId = files.length + 1;
+
+        // --- FUNGSI GENERATE THUMBNAIL DARI VIDEO (SISI BROWSER) ---
+        function generateVideoThumbnail(file) {
+            return new Promise((resolve, reject) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+
+                video.onloadedmetadata = function() {
+                    video.currentTime = Math.min(1, video.duration / 2); 
+                };
+
+                video.onseeked = function() {
+                    const canvas = document.createElement('canvas');
+                    // Sesuaikan dengan rasio thumbnail baru (5:3)
+                    canvas.width = 300; 
+                    canvas.height = 180; 
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    try {
+                        const dataURL = canvas.toDataURL('image/jpeg', 0.8); 
+                        resolve(dataURL);
+                    } catch (e) {
+                        reject("Gagal mengkonversi canvas ke Data URL.");
+                    } finally {
+                        video.remove();
+                    }
+                };
+
+                video.onerror = function(e) {
+                    reject("Gagal memuat video atau metadata.");
+                };
+
+                video.src = URL.createObjectURL(file);
+            });
+        }
+        // --------------------------------------------------------------------
+
+
+        // FUNGSI RENDER GALERI
+        function renderGallery(fileList) {
+            gallery.innerHTML = ''; 
+            fileList.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-item';
+                item.dataset.fileId = file.id;
+
+                // Event listener untuk seleksi (toggle class selected)
+                item.addEventListener('click', (event) => {
+                    if (!event.target.closest('.action-buttons') && event.target.className !== 'selection-checkbox') {
+                        item.classList.toggle('selected');
+                        const checkbox = item.querySelector('.selection-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = item.classList.contains('selected');
+                        }
+                    }
+                });
+                
+                let playButton = '';
+                let onClickAction = '';
+
+                if (file.type === 'video') {
+                    playButton = `<button title="Putar Video" onclick="openModal(event, '${file.fileUrl}')">▶️</button>`;
+                    onClickAction = `onclick="openModal(event, '${file.fileUrl}')"`;
+                }
+
+                item.innerHTML = `
+                    <div class="selection-overlay">
+                        <input type="checkbox" class="selection-checkbox" data-file-id="${file.id}" 
+                            onclick="event.stopPropagation(); this.closest('.file-item').classList.toggle('selected', this.checked);">
+                    </div>
+                    <div class="thumbnail-wrapper" ${onClickAction}>
+                        <img src="${file.thumbnailUrl}" alt="Thumbnail ${file.name}">
+                    </div>
+                    <div class="file-info">
+                        <h4>${file.name}</h4>
+                        <div class="action-buttons">
+                            ${playButton}
+                            <button title="Unduh File" onclick="downloadFile(event, '${file.fileUrl}', '${file.name}')">
+                                ⬇️
+                            </button>
+                            <button class="delete-btn" title="Hapus File" onclick="deleteFile(event, ${file.id})">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                gallery.appendChild(item);
+            });
+        }
+
+        // FUNGSI PEMUTAR VIDEO (MODAL)
+        function openModal(event, videoUrl) {
+            event.stopPropagation();
+            videoPlayer.src = videoUrl;
+            videoModal.style.display = 'block';
+            videoPlayer.play();
+        }
+
+        function closeModal() {
+            videoPlayer.pause();
+            videoPlayer.src = ''; 
+            videoModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == videoModal) {
+                closeModal();
+            }
+        }
+
+        // FUNGSI AKSI (INDIVIDUAL)
+        function downloadFile(event, fileUrl, fileName) {
+            event.stopPropagation();
+            const a = document.createElement('a');
+            a.href = fileUrl;
+            a.download = fileName; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            alert(`Simulasi: File "${fileName}" sedang diunduh.`);
+        }
+
+        function deleteFile(event, fileId) {
+            event.stopPropagation();
+            if (confirm(`Apakah Anda yakin ingin menghapus file ID ${fileId} ini?`)) {
+                const index = files.findIndex(f => f.id === fileId);
+                if (index > -1) {
+                    files.splice(index, 1);
+                    renderGallery(files); 
+                    alert('File berhasil dihapus (Simulasi)!');
+                } else {
+                    alert('Gagal menghapus file (Simulasi: File tidak ditemukan).');
+                }
+            }
+        }
+
+        // FUNGSI IMPORT (UNGGAH)
+        fileUploadInput.addEventListener('change', async function() { 
+            const selectedFiles = this.files;
+            
+            if (selectedFiles.length === 0) {
+                 fileCountSpan.textContent = '';
+                 return;
+            }
+            
+            uploadStatusSpan.textContent = '';
+            fileCountSpan.textContent = `${selectedFiles.length} file siap diunggah.`;
+
+            if (confirm(`Anda yakin ingin mengunggah ${selectedFiles.length} file? (Simulasi)`)) {
+                uploadStatusSpan.textContent = 'Memproses thumbnail... Mohon tunggu.';
+                
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const isVideo = file.type.startsWith('video/');
+                    let thumbnailUrl = URL.createObjectURL(file);
+                    
+                    if (isVideo) {
+                        try {
+                            thumbnailUrl = await generateVideoThumbnail(file); 
+                        } catch (error) {
+                            console.error("Kesalahan pembuatan thumbnail:", error);
+                            thumbnailUrl = "https://via.placeholder.com/300x180?text=Gagal+Thumbnail";
+                        }
+                    }
+
+                    const newFile = {
+                        id: newFileId++,
+                        name: file.name,
+                        type: isVideo ? "video" : "image",
+                        thumbnailUrl: thumbnailUrl,
+                        fileUrl: URL.createObjectURL(file) 
+                    };
+                    files.push(newFile);
+                }
+
+                renderGallery(files); 
+                uploadStatusSpan.textContent = '';
+                fileCountSpan.textContent = `${selectedFiles.length} file berhasil diunggah!`;
+                this.value = '';
+            } else {
+                fileCountSpan.textContent = '';
+                uploadStatusSpan.textContent = '';
+                this.value = '';
+            }
+        });
+
+
+        // FUNGSI EXPORT (UNDUH MASSAL)
+        function exportSelectedFiles() {
+            const selectedCheckboxes = document.querySelectorAll('.selection-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                alert('Pilih setidaknya satu file untuk diekspor.');
+                return;
+            }
+
+            const selectedFileIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.dataset.fileId));
+            const filesToExport = files.filter(file => selectedFileIds.includes(file.id));
+            
+            alert(`Simulasi: ${filesToExport.length} file terpilih. Unduhan massal dimulai.`);
+            
+            filesToExport.forEach((file, index) => {
+                setTimeout(() => {
+                    downloadFile({ stopPropagation: () => {} }, file.fileUrl, file.name); 
+                }, index * 500); 
+            });
+        }
+
+        // Jalankan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGallery(files);
+        });
+
+    </script>
+</body>
+</html> 
